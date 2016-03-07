@@ -13,6 +13,7 @@ isChild = (x) ->
   _.isString(x) or
   isComponent(x) or
   _.isNumber(x) or
+  _.isBoolean(x) or
   isVText(x) or
   isWidget(x) or
   isThunk(x)
@@ -48,6 +49,9 @@ renderChild = (child, props = {}) ->
 
   if _.isNumber(child)
     return '' + child
+
+  if _.isBoolean(child)
+    return ''
 
   return child
 

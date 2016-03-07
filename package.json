@@ -1,6 +1,6 @@
 {
   "name": "zorium",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Zorium, The CoffeeScript Web Framework. Zorium offers a full virtual-dom experience, similar to react, without the need for jsx. For more documentation see http://zorium.org",
   "keywords": [
     "zorium",
