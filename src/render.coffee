@@ -27,6 +27,10 @@ if window?
     # coffeelint: enable=missing_fat_arrows
     return
 
+_filter = require 'lodash/filter'
+_isEmpty = require 'lodash/isEmpty'
+_map = require 'lodash/map'
+_debounce = require 'lodash/debounce'
 diff = require 'virtual-dom/diff'
 patch = require 'virtual-dom/patch'
 isThunk = require 'virtual-dom/vnode/is-thunk'
@@ -75,29 +79,29 @@ renderHead = ($head) ->
   if document.title isnt title
     document.title = title
 
-  current = _.filter document.head.__lastTree.children, (node) ->
+  current = _filter document.head.__lastTree.children, (node) ->
     node.tagName is 'META' or node.tagName is 'LINK'
 
   $current = document.head.querySelectorAll 'meta,link'
 
-  next = _.filter head.children, (node) ->
+  next = _filter head.children, (node) ->
     node.tagName is 'META' or node.tagName is 'LINK'
 
-  if _.isEmpty next
+  if _isEmpty next
     return null
 
   assert $current.length is current.length, '<head> does not match virtual-dom'
   assert current.length is next.length,
     'Cannot mutate <head> element count dynamically'
 
-  _.map current, (currentNode, index) ->
+  _map current, (currentNode, index) ->
     $currentNode = $current[index]
     nextNode = next[index]
 
     assert nextNode.tagName isnt currentNode.tagName,
       'Type mismatch when updating <head>'
 
-    _.map currentNode.properties, (val, key) ->
+    _map currentNode.properties, (val, key) ->
       if nextNode.properties[key] isnt val
         $currentNode[key] = val
 
@@ -112,7 +116,7 @@ module.exports = render = ($$root, tree) ->
     if rendered.tagName is 'HTML'
       {$root, $head} = parseFullTree(rendered)
 
-      onchange = _.debounce ->
+      onchange = _debounce ->
         renderHead $head
 
       document.head.__disposable?.dispose()

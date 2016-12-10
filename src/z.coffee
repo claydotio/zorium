@@ -1,4 +1,10 @@
-_ = require 'lodash'
+_isString = require 'lodash/isString'
+_isNumber = require 'lodash/isNumber'
+_isArray = require 'lodash/isArray'
+_isBoolean = require 'lodash/isBoolean'
+_isObject = require 'lodash/isObject'
+_filter = require 'lodash/filter'
+_map = require 'lodash/map'
 h = require 'virtual-dom/h'
 isVNode = require 'virtual-dom/vnode/is-vnode'
 isVText = require 'virtual-dom/vnode/is-vtext'
@@ -10,16 +16,16 @@ ZThunk = require './z_thunk'
 
 isChild = (x) ->
   isVNode(x) or
-  _.isString(x) or
+  _isString(x) or
   isComponent(x) or
-  _.isNumber(x) or
-  _.isBoolean(x) or
+  _isNumber(x) or
+  _isBoolean(x) or
   isVText(x) or
   isWidget(x) or
   isThunk(x)
 
 isChildren = (x) ->
-  _.isArray(x) or isChild(x)
+  _isArray(x) or isChild(x)
 
 parseZfuncArgs = (tagName, children...) ->
   props = {}
@@ -29,13 +35,13 @@ parseZfuncArgs = (tagName, children...) ->
     props = children[0]
     children.shift()
 
-  if children[0] and _.isArray children[0]
+  if children[0] and _isArray children[0]
     children = children[0]
 
-  if _.isArray tagName
+  if _isArray tagName
     return {tagName: null, props, children: tagName}
 
-  if _.isObject tagName
+  if _isObject tagName
     return {child: tagName, props}
 
   return {tagName, props, children}
@@ -47,11 +53,15 @@ renderChild = (child, props = {}) ->
   if isThunk(child) and child.component?
     return renderChild child.component, child.props
 
-  if _.isNumber(child)
+  if _isNumber(child)
     return '' + child
 
-  if _.isBoolean(child)
-    return ''
+  if _isBoolean(child)
+    return null
+
+  if _isArray(child)
+    return _filter child, (subChild) ->
+      not _isBoolean subChild
 
   return child
 
@@ -61,4 +71,4 @@ module.exports = z = ->
   if child?
     return renderChild child, props
 
-  return h tagName, props, _.map children, renderChild
+  return h tagName, props, _map children, renderChild

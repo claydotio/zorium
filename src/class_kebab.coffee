@@ -1,5 +1,9 @@
-_ = require 'lodash'
+_map = require 'lodash/map'
+_keys = require 'lodash/keys'
+_pick = require 'lodash/pick'
+_identity = require 'lodash/identity'
+_kebabCase = require 'lodash/kebabCase'
 
 module.exports = (classes) ->
-  _.map _.keys(_.pick classes, _.identity), _.kebabCase
+  _map _keys(_pick classes, _identity), _kebabCase
   .join ' '

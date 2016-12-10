@@ -1,4 +1,7 @@
-_ = require 'lodash'
+_map = require 'lodash/map'
+_difference = require 'lodash/difference'
+_isEqual = require 'lodash/isEqual'
+_isArray = require 'lodash/isArray'
 h = require 'virtual-dom/h'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
@@ -73,11 +76,11 @@ module.exports = class ZThunk
       currentChildren = []
       @component.__onRender = (tree) =>
         @component.__isDirty = false
-        nextChildren = _.map getZThunks(tree), (thunk) -> thunk.component
-        newChildren = _.difference nextChildren, currentChildren
+        nextChildren = _map getZThunks(tree), (thunk) -> thunk.component
+        newChildren = _difference nextChildren, currentChildren
         currentChildren = nextChildren
 
-        _.map newChildren, (child) ->
+        _map newChildren, (child) ->
           child.__onDirty = dirty
 
   type: 'Thunk'
@@ -85,7 +88,7 @@ module.exports = class ZThunk
   isEqual: (previous) =>
     previous?.componenet is @component and
     not @component.__isDirty and
-    _.isEqual previous.props, @props
+    _isEqual previous.props, @props
 
   render: (previous) =>
     if @isEqual(previous)
@@ -97,7 +100,7 @@ module.exports = class ZThunk
     if isComponent(tree) or isThunk(tree)
       throw new Error 'Cannot return another component from render'
 
-    if _.isArray tree
+    if _isArray tree
       throw new Error 'Render cannot return an array'
 
     unless tree?

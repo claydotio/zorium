@@ -1,4 +1,4 @@
-_ = require 'lodash'
+_defaults = require 'lodash/defaults'
 del = require 'del'
 gulp = require 'gulp'
 mocha = require 'gulp-mocha'
@@ -42,7 +42,7 @@ webpackProdConfig =
     extensions: ['.coffee', '.js', '.json', '']
 
 gulp.task 'test', ['scripts:test', 'lint', 'test:server'], (cb) ->
-  karma.start _.defaults(singleRun: true, karmaConf), cb
+  karma.start _defaults(singleRun: true, karmaConf), cb
 
 gulp.task 'test:server', ->
   gulp.src paths.rootServerTests
@@ -60,7 +60,7 @@ gulp.task 'lint', ->
     .pipe coffeelint.reporter()
 
 gulp.task 'test:phantom', ['scripts:test'], (cb) ->
-  karma.start _.defaults({
+  karma.start _defaults({
     singleRun: true,
     browsers: ['PhantomJS']
   }, karmaConf), cb

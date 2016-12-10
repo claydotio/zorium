@@ -1,4 +1,4 @@
-_ = require 'lodash'
+_assign = require 'lodash/assign'
 
 # Bind polyfill (phantomjs doesn't support bind)
 # coffeelint: disable=missing_fat_arrows
@@ -77,7 +77,7 @@ isSimpleClick = require './is_simple_click'
 bind = require './bind'
 untilStable = require './until_stable'
 
-_.assign z, {
+_assign z, {
   render
   renderToString
   router

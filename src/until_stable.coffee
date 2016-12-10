@@ -1,4 +1,4 @@
-_ = require 'lodash'
+_map = require 'lodash/map'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
 # TODO: use native promises, upgrade node
@@ -20,14 +20,14 @@ untilStable = (zthunk) ->
   # TODO: test performance assumption
   try
     children = getZThunks zthunk.render()
-    Promise.all _.map children, untilStable
+    Promise.all _map children, untilStable
   catch err
     return Promise.reject err
 
   onStable = if state? then state._onStable else (-> Promise.resolve null)
   onStable().then ->
     children = getZThunks zthunk.render()
-    Promise.all _.map children, untilStable
+    Promise.all _map children, untilStable
   .then -> zthunk
 
 module.exports = (tree, {timeout} = {}) ->
@@ -40,7 +40,7 @@ module.exports = (tree, {timeout} = {}) ->
         reject new Error "Timeout, request took longer than #{timeout}ms"
       , timeout
 
-    Promise.all _.map getZThunks(tree), (zthunk) ->
+    Promise.all _map getZThunks(tree), (zthunk) ->
       untilStable zthunk
     .then resolve
     .catch reject

@@ -1,4 +1,4 @@
-_ = require 'lodash'
+_debounce = require 'lodash/debounce'
 Rx = require 'rx-lite'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
@@ -16,7 +16,7 @@ module.exports = ($$root, tree) ->
   unless isZThunk tree
     throw new Error 'Passed a tree, not a component'
 
-  onchange = _.debounce ->
+  onchange = _debounce ->
     render $$root, new ZThunk {
       component: tree.component
       props: tree.props

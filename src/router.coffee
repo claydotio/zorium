@@ -1,4 +1,5 @@
-_ = require 'lodash'
+_defaults = require 'lodash/defaults'
+_once = require 'lodash/once'
 Qs = require 'qs'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
@@ -68,7 +69,7 @@ class Router
 
   init: (config) =>
     assert window?, 'config called server-side'
-    @config = _.defaults config, @config
+    @config = _defaults config, @config
 
   link: (node) =>
     if node.properties.onclick
@@ -117,7 +118,7 @@ class Router
       path: pathname
       query: query
     ,
-      send: _.once ($component) =>
+      send: _once ($component) =>
         if $component isnt @$lastRoot
           @$lastRoot = $component
           bind @config.$$root, @$lastRoot

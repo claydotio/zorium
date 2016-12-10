@@ -1,8 +1,9 @@
-_ = require 'lodash'
+_flatten = require 'lodash/flatten'
+_map = require 'lodash/map'
 isZThunk = require './is_z_thunk'
 
 module.exports = getZThunks = (tree) ->
   if isZThunk tree
     [tree]
   else
-    _.flatten _.map tree.children, getZThunks
+    _flatten _map tree.children, getZThunks
