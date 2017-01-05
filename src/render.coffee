@@ -116,17 +116,9 @@ module.exports = render = ($$root, tree) ->
     if rendered.tagName is 'HTML'
       {$root, $head} = parseFullTree(rendered)
 
-      onchange = _debounce ->
-        renderHead $head
-
-      document.head.__disposable?.dispose()
-      hasState = $head.component?.state?
       document.head.__lastTree = parser document.head
 
-      if hasState
-        document.head.__disposable = $head.component.state.subscribe onchange
-      else
-        renderHead $head
+      renderHead $head
 
       tree = $root
 
