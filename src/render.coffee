@@ -118,7 +118,13 @@ module.exports = render = ($$root, tree) ->
 
       document.head.__lastTree = parser document.head
 
-      renderHead $head
+      hasState = $head.component?.state?
+      onchange = _debounce (val) ->
+        renderHead $head
+      if hasState and not $head.component.__disposable
+        $head.component.__disposable = $head.component.state.subscribe onchange
+      else
+        renderHead $head
 
       tree = $root
 
