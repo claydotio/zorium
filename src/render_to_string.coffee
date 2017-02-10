@@ -26,13 +26,9 @@ module.exports = (tree, {timeout} = {}) ->
   if isComponent tree
     tree = z tree
 
-  try
-    safe = toHTML tree
-  catch err
-    return Promise.reject err
-
   untilStable tree, {timeout}
   .then -> toHTML tree
   .catch (err) ->
-    err.html = safe
+    err.html = toHTML tree
+
     throw err
