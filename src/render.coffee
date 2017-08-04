@@ -80,12 +80,12 @@ renderHead = ($head) ->
     document.title = title
 
   current = _filter document.head.__lastTree.children, (node) ->
-    node.tagName is 'META' or node.tagName is 'LINK'
+    node?.tagName is 'META' or node?.tagName is 'LINK'
 
   $current = document.head.querySelectorAll 'meta,link'
 
   next = _filter head.children, (node) ->
-    node.tagName is 'META' or node.tagName is 'LINK'
+    node?.tagName is 'META' or node?.tagName is 'LINK'
 
   if _isEmpty next
     return null
@@ -97,6 +97,9 @@ renderHead = ($head) ->
   _map current, (currentNode, index) ->
     $currentNode = $current[index]
     nextNode = next[index]
+
+    unless nextNode
+      return
 
     assert nextNode.tagName isnt currentNode.tagName,
       'Type mismatch when updating <head>'
@@ -113,7 +116,7 @@ module.exports = render = ($$root, tree) ->
 
   if isThunk tree
     rendered = tree.render()
-    if rendered.tagName is 'HTML'
+    if rendered?.tagName is 'HTML'
       {$root, $head} = parseFullTree(rendered)
 
       document.head.__lastTree = parser document.head
