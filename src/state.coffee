@@ -5,7 +5,7 @@ _isPlainObject = require 'lodash/isPlainObject'
 _map = require 'lodash/map'
 _bind = require 'lodash/bind'
 _defaults = require 'lodash/defaults'
-Rx = require 'rx-lite'
+Rx = require 'rxjs'
 
 # TODO: use native promises, upgrade node
 if window?
@@ -47,19 +47,19 @@ module.exports = (initialState) ->
       pendingSettlement += 1
       hasSettled = false
 
-      Rx.Observable.just(null).concat val.doOnNext (update) ->
+      Rx.Observable.of(null).concat val.do (update) ->
         unless hasSettled
           pendingSettlement -= 1
           hasSettled = true
 
         currentState = stateSubject.getValue()
         if currentState[key] isnt update
-          stateSubject.onNext _defaults {
+          stateSubject.next _defaults {
             "#{key}": update
           }, currentState
     else
-      Rx.Observable.just null
-  .flatMapLatest -> stateSubject
+      Rx.Observable.of null
+  .switchMap -> stateSubject
 
   state.getValue = _bind stateSubject.getValue, stateSubject
   state.set = (diff) ->
@@ -74,7 +74,7 @@ module.exports = (initialState) ->
         if currentState[key] isnt val
           currentState[key] = val
 
-    stateSubject.onNext currentState
+    stateSubject.next currentState
 
   stablePromise = null
   state._onStable = ->
@@ -91,12 +91,12 @@ module.exports = (initialState) ->
     .catch (err) ->
       # disposing here server-side breaks cache
       if window?
-        disposable?.dispose()
+        disposable?.unsubscribe()
       throw err
     .then ->
       # disposing here server-side breaks cache
       if window?
-        disposable.dispose()
+        disposable.unsubscribe()
       return null
 
   return state

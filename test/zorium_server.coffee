@@ -1,5 +1,5 @@
 b = require 'b-assert'
-Rx = require 'rx-lite'
+Rx = require 'rxjs'
 
 z = require '../src/zorium'
 
@@ -52,7 +52,7 @@ describe 'server side rendering', ->
         {abc} = @state.getValue()
 
         unless abc?
-          @pending.onNext 'abc'
+          @pending.next 'abc'
 
         z 'div', abc
 
@@ -86,9 +86,9 @@ describe 'server side rendering', ->
 
     $root = new Root()
     child = new AsyncChild()
-    componentSubject.onNext child
+    componentSubject.next child
     setTimeout ->
-      child.pending.onNext 'abc'
+      child.pending.next 'abc'
     z.renderToString $root
     .then (html) ->
       b html, '<div><div>abc</div></div>'
@@ -103,7 +103,7 @@ describe 'server side rendering', ->
         {abc} = @state.getValue()
 
         unless abc?
-          @pending.onNext 'abc'
+          @pending.next 'abc'
 
         z 'div', abc + ' ' + name
 
@@ -124,7 +124,7 @@ describe 'server side rendering', ->
 
   it 'handles state errors', ->
     pending = new Rx.BehaviorSubject(null)
-    pending.onError new Error 'test'
+    pending.error new Error 'test'
 
     class Root
       constructor: ->
@@ -176,7 +176,7 @@ describe 'server side rendering', ->
     $root = new Root()
 
     setTimeout ->
-      pending.onNext 'invalid'
+      pending.next 'invalid'
 
     z.renderToString $root
     .then ->

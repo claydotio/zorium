@@ -56,7 +56,7 @@ describe 'z.state', ->
       subject: subject
 
     try
-      subject.onError new Error 'err'
+      subject.error new Error 'err'
       b false
     catch err
       b err?

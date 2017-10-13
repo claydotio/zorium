@@ -1,5 +1,4 @@
 _debounce = require 'lodash/debounce'
-Rx = require 'rx-lite'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
 z = require './z'
