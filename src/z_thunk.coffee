@@ -44,7 +44,7 @@ module.exports = class ZThunk
 
         if unmountQueueCnt > 0
           @component.beforeUnmount?()
-          @component.__disposable?.dispose()
+          @component.__disposable?.unsubscribe()()
           isMounted = false
 
         # basic if mounts > unmounts but also
