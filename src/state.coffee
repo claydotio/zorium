@@ -5,7 +5,14 @@ _isPlainObject = require 'lodash/isPlainObject'
 _map = require 'lodash/map'
 _bind = require 'lodash/bind'
 _defaults = require 'lodash/defaults'
-Rx = require 'rxjs'
+RxBehaviorSubject = require('rxjs/BehaviorSubject').BehaviorSubject
+RxObservable = require('rxjs/Observable').Observable
+require 'rxjs/observable/of'
+require 'rxjs/observable/combineLatest'
+# doesn't seem to work properly. https://github.com/ReactiveX/rxjs/issues/2554
+# require 'rxjs/operator/concat'
+concat = require('rxjs/operator/concat').concat
+RxObservable.prototype.concat = concat
 
 # TODO: use native promises, upgrade node
 if window?
@@ -19,10 +26,10 @@ assert = require './assert'
 
 # TODO: move to util?
 forkJoin = (observables...) ->
-  Rx.Observable.combineLatest _flatten(observables), (results...) -> results
+  RxObservable.combineLatest _flatten(observables), (results...) -> results
 
 subjectFromInitialState = (initialState) ->
-  new Rx.BehaviorSubject _mapValues initialState, (val) ->
+  new RxBehaviorSubject _mapValues initialState, (val) ->
     if val?.subscribe?
       # BehaviorSubject
       if _isFunction val.getValue
@@ -47,7 +54,7 @@ module.exports = (initialState) ->
       pendingSettlement += 1
       hasSettled = false
 
-      Rx.Observable.of(null).concat val.do (update) ->
+      RxObservable.of(null).concat val.do (update) ->
         unless hasSettled
           pendingSettlement -= 1
           hasSettled = true
@@ -58,7 +65,7 @@ module.exports = (initialState) ->
             "#{key}": update
           }, currentState
     else
-      Rx.Observable.of null
+      RxObservable.of null
   .switchMap -> stateSubject
 
   state.getValue = _bind stateSubject.getValue, stateSubject
