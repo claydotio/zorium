@@ -1,4 +1,3 @@
-_debounce = require 'lodash/debounce'
 isThunk = require 'virtual-dom/vnode/is-thunk'
 
 z = require './z'
@@ -15,11 +14,16 @@ module.exports = ($$root, tree) ->
   unless isZThunk tree
     throw new Error 'Passed a tree, not a component'
 
-  onchange = _debounce ->
-    render $$root, new ZThunk {
-      component: tree.component
-      props: tree.props
-    }
+  timeout = null
+  onchange = ->
+    # debounce (_.debounce uses setTimeout which is more likely to hang)
+    if timeout
+      window.cancelAnimationFrame timeout
+    timeout = window.requestAnimationFrame ->
+      render $$root, new ZThunk {
+        component: tree.component
+        props: tree.props
+      }
 
   tree.component.__onDirty = onchange
 
