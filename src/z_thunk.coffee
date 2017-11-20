@@ -86,13 +86,13 @@ module.exports = class ZThunk
   type: 'Thunk'
 
   isEqual: (previous) =>
-    previous?.componenet is @component and
+    previous?.component is @component and
     not @component.__isDirty and
     _isEqual previous.props, @props
 
   render: (previous) =>
-    if @isEqual(previous)
-      return previous
+    if previous?.component?.__tree and @isEqual(previous)
+      return previous.component.__tree
 
     # TODO: this could be optimized to capture children during render
     tree = @component.render @props
@@ -111,5 +111,6 @@ module.exports = class ZThunk
     tree.hooks['zorium-hook'] = @component.__hook
 
     @component.__onRender tree
+    @component.__tree = tree
 
     return tree
