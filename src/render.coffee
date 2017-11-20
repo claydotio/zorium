@@ -126,8 +126,6 @@ module.exports = render = ($$root, tree) ->
         renderHead $head
       if hasState and not $head.component.__disposable
         $head.component.__disposable = $head.component.state.subscribe onchange
-      else
-        renderHead $head
 
       tree = $root
 
