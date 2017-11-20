@@ -67,6 +67,6 @@
     "rxjs": "^5.4.3",
     "vdom-parser": "^1.2.1",
     "vdom-to-html": "^2.0.0",
-    "virtual-dom": "^2.0.1"
+    "virtual-dom": "git://github.com/claydotio/virtual-dom.git"
   }
 }
