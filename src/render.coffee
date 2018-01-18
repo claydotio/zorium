@@ -80,12 +80,12 @@ renderHead = ($head) ->
     document.title = title
 
   current = _filter document.head.__lastTree.children, (node) ->
-    node?.tagName is 'META' or node?.tagName is 'LINK'
+    node?.tagName in ['META', 'LINK', 'STYLE']
 
-  $current = document.head.querySelectorAll 'meta,link'
+  $current = document.head.querySelectorAll 'meta,link, style'
 
   next = _filter head.children, (node) ->
-    node?.tagName is 'META' or node?.tagName is 'LINK'
+    node?.tagName in ['META', 'LINK', 'STYLE']
 
   if _isEmpty next
     return null
@@ -104,8 +104,11 @@ renderHead = ($head) ->
     assert nextNode.tagName isnt currentNode.tagName,
       'Type mismatch when updating <head>'
 
-    _map currentNode.properties, (val, key) ->
-      if nextNode.properties[key] isnt val
+    _map nextNode.properties, (val, key) ->
+      hasChanged = if key is 'innerHTML' \
+                   then $currentNode[key] isnt val
+                   else currentNode.properties[key] isnt val
+      if hasChanged
         $currentNode[key] = val
 
   document.head.__lastTree = head
@@ -124,6 +127,7 @@ module.exports = render = ($$root, tree) ->
       hasState = $head.component?.state?
       onchange = _debounce (val) ->
         renderHead $head
+
       if hasState and not $head.component.__disposable
         $head.component.__disposable = $head.component.state.subscribe onchange
 
