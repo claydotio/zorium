@@ -84,26 +84,30 @@ module.exports = (initialState) ->
     stateSubject.next currentState
 
   stablePromise = null
-  state._onStable = ->
+  state._onStable = (timeout) ->
     if stablePromise?
       return stablePromise
-    disposable = null
     stablePromise = new Promise (resolve) ->
       hasSettled = false
-      # TODO: make sure this doesn't leak server-side
-      disposable = state.subscribe ->
+      state._disposeOnStable = state.subscribe ->
         if pendingSettlement is 0 and not hasSettled
           hasSettled = true
           resolve()
+      if timeout
+        setTimeout (-> state._disposeOnStable?.unsubscribe()), timeout
     .catch (err) ->
-      # disposing here server-side breaks cache
-      if window?
-        disposable?.unsubscribe()
+      # disposing here server-side breaks cache?
+      # not disposing creates server-side memory leak
+      # if window?
+      state._disposeOnStable?.unsubscribe()
+      delete state._disposeOnStable
       throw err
     .then ->
-      # disposing here server-side breaks cache
-      if window?
-        disposable.unsubscribe()
+      # disposing here server-side breaks cache?
+      # not disposing is server-side memory leak
+      # if window?
+      state._disposeOnStable.unsubscribe()
+      delete state._disposeOnStable
       return null
 
   return state
