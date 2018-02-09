@@ -96,18 +96,18 @@ module.exports = (initialState) ->
       if timeout
         setTimeout (-> state._disposeOnStable?.unsubscribe()), timeout
     .catch (err) ->
-      # disposing here server-side breaks cache?
-      # not disposing creates server-side memory leak
-      # if window?
-      state._disposeOnStable?.unsubscribe()
-      delete state._disposeOnStable
+      # disposing here server-side breaks cache
+      # not disposing creates server-side memory leak w/o the setTimeout above
+      if window? or not timeout
+        state._disposeOnStable?.unsubscribe()
+        delete state._disposeOnStable
       throw err
     .then ->
-      # disposing here server-side breaks cache?
-      # not disposing is server-side memory leak
-      # if window?
-      state._disposeOnStable.unsubscribe()
-      delete state._disposeOnStable
+      # disposing here server-side breaks cache
+      # not disposing creates server-side memory leak w/o the setTimeout above
+      if window? or not timeout
+        state._disposeOnStable.unsubscribe()
+        delete state._disposeOnStable
       return null
 
   return state
