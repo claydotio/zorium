@@ -9,6 +9,7 @@ RxBehaviorSubject = require('rxjs/BehaviorSubject').BehaviorSubject
 RxObservable = require('rxjs/Observable').Observable
 require 'rxjs/add/observable/of'
 require 'rxjs/add/observable/combineLatest'
+require 'rxjs/add/operator/switchMap'
 # doesn't seem to work properly. https://github.com/ReactiveX/rxjs/issues/2554
 # require 'rxjs/operator/concat'
 concat = require('rxjs/operator/concat').concat
