@@ -28,6 +28,7 @@ if window?
     return
 
 _filter = require 'lodash/filter'
+_findIndex = require 'lodash/findIndex'
 _isEmpty = require 'lodash/isEmpty'
 _map = require 'lodash/map'
 _debounce = require 'lodash/debounce'
@@ -80,29 +81,38 @@ renderHead = ($head) ->
     document.title = title
 
   current = _filter document.head.__lastTree.children, (node) ->
-    node?.tagName in ['META', 'LINK', 'STYLE']
+    node?.tagName in ['META', 'LINK', 'STYLE', 'SCRIPT']
 
-  $current = document.head.querySelectorAll 'meta,link, style'
+  $current = document.head.querySelectorAll 'meta,link,style,script'
 
   next = _filter head.children, (node) ->
-    node?.tagName in ['META', 'LINK', 'STYLE']
+    node?.tagName in ['META', 'LINK', 'STYLE', 'SCRIPT']
 
   if _isEmpty next
     return null
 
-  assert $current.length is current.length, '<head> does not match virtual-dom'
-  assert current.length is next.length,
-    'Cannot mutate <head> element count dynamically'
+  usedNodes = []
 
-  _map current, (currentNode, index) ->
-    $currentNode = $current[index]
-    nextNode = next[index]
+  _map next, (nextNode) ->
+    nodeIndex = _findIndex current, ({properties}) ->
+      properties.id is nextNode.properties.id
+    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
+      nodeIndex = _findIndex current, ({properties}) ->
+        properties.property is nextNode.properties.property
+    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
+      nodeIndex = _findIndex current, ({properties}) ->
+        properties.name is nextNode.properties.name
+    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
+      nodeIndex = _findIndex current, ({tagName}, i) ->
+        tagName is nextNode.tagName and usedNodes.indexOf(i) is -1
 
-    unless nextNode
+    usedNodes.push nodeIndex
+
+    $currentNode = $current[nodeIndex]
+    currentNode = current[nodeIndex]
+
+    unless nextNode and currentNode
       return
-
-    assert nextNode.tagName isnt currentNode.tagName,
-      'Type mismatch when updating <head>'
 
     _map nextNode.properties, (val, key) ->
       hasChanged = if key is 'innerHTML' \
