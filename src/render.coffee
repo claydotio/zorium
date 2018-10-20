@@ -27,8 +27,9 @@ if window?
     # coffeelint: enable=missing_fat_arrows
     return
 
+_differenceBy = require 'lodash/differenceBy'
 _filter = require 'lodash/filter'
-_findIndex = require 'lodash/findIndex'
+_forEach = require 'lodash/forEach'
 _isEmpty = require 'lodash/isEmpty'
 _map = require 'lodash/map'
 _debounce = require 'lodash/debounce'
@@ -68,6 +69,18 @@ assert = (isTrue, message) ->
   unless isTrue?
     throw new Error message
 
+getElFromVirtualNode = (node) ->
+  # find by id
+  $el = document.head.querySelector "##{node.properties.id}"
+  if node.tagName is 'META'
+    # find by properties
+    $el ?= document.head.querySelector "meta[property='#{node.properties.property}']"
+    # find by name
+    $el ?= document.head.querySelector "meta[name='#{node.properties.name}']"
+  $el
+
+# only updates elements <script>, <link> and <style>
+# with ids, <meta> with name/property
 renderHead = ($head) ->
   head = flatten $head
 
@@ -81,45 +94,43 @@ renderHead = ($head) ->
     document.title = title
 
   current = _filter document.head.__lastTree.children, (node) ->
-    node?.tagName in ['META', 'LINK', 'STYLE', 'SCRIPT']
-
-  $current = document.head.querySelectorAll 'meta,link,style,script'
+    node?.tagName in ['LINK', 'STYLE', 'SCRIPT'] and node?.properties?.id or (
+      node?.tagName is 'META' and (
+        node?.properties?.name or node?.properties?.property
+      )
+    )
 
   next = _filter head.children, (node) ->
-    node?.tagName in ['META', 'LINK', 'STYLE', 'SCRIPT']
+    node?.tagName in ['LINK', 'STYLE', 'SCRIPT'] and node?.properties?.id or (
+      node?.tagName is 'META' and (
+        node?.properties?.name or node?.properties?.property
+      )
+    )
+
+  missing = _differenceBy current, next, (value) ->
+    value.properties.id or value.properties.name or value.properties.property
+
+  _forEach missing, (node) ->
+    $el = getElFromVirtualNode node
+    document.head.removeChild $el
 
   if _isEmpty next
     return null
 
-  usedNodes = []
+  _forEach next, (nextNode) ->
+    $el = getElFromVirtualNode nextNode
 
-  _map next, (nextNode) ->
-    nodeIndex = _findIndex current, ({properties}) ->
-      properties.id is nextNode.properties.id
-    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
-      nodeIndex = _findIndex current, ({properties}) ->
-        properties.property is nextNode.properties.property
-    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
-      nodeIndex = _findIndex current, ({properties}) ->
-        properties.name is nextNode.properties.name
-    if nodeIndex is -1 or usedNodes.indexOf(nodeIndex) isnt -1
-      nodeIndex = _findIndex current, ({tagName}, i) ->
-        tagName is nextNode.tagName and usedNodes.indexOf(i) is -1
-
-    usedNodes.push nodeIndex
-
-    $currentNode = $current[nodeIndex]
-    currentNode = current[nodeIndex]
-
-    unless nextNode and currentNode
-      return
-
-    _map nextNode.properties, (val, key) ->
-      hasChanged = if key is 'innerHTML' \
-                   then $currentNode[key] isnt val
-                   else currentNode.properties[key] isnt val
-      if hasChanged
-        $currentNode[key] = val
+    if $el
+      _map nextNode.properties, (val, key) ->
+        hasChanged = $el[key] isnt val
+                     # else $el.properties[key] isnt val
+        if hasChanged
+          $el[key] = val
+    else # nothing found ,insert new
+      $newEl = document.createElement nextNode.tagName
+      _forEach nextNode.properties, (value, property) ->
+        $newEl[property] = value
+      document.head.appendChild $newEl
 
   document.head.__lastTree = head
 
