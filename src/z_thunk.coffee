@@ -13,7 +13,7 @@ hook = ({beforeMount, beforeUnmount}) ->
   class Hook
     hook: ($el, propName) ->
       beforeMount($el)
-    unhook: ->
+    unhook: beforeUnmount and ->
       beforeUnmount()
 
   new Hook()
@@ -35,10 +35,11 @@ module.exports = class ZThunk
       unmountQueueCnt = 0
       mountedEl = null
       isMounted = false
+      needsUnmountHook = state or @component.beforeUnmount
       runHooks = =>
         wasMounted = isMounted
 
-        if mountQueueCnt > unmountQueueCnt + 1
+        if needsUnmountHook and mountQueueCnt > unmountQueueCnt + 1
           throw new Error "Component '#{@component.constructor?.name}'
             cannot be mounted twice at the same time"
 
@@ -67,7 +68,7 @@ module.exports = class ZThunk
           setTimeout ->
             runHooks()
 
-        beforeUnmount: ->
+        beforeUnmount: needsUnmountHook and ->
           unmountQueueCnt += 1
 
           setTimeout ->
