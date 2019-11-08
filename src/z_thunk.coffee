@@ -28,8 +28,9 @@ module.exports = class ZThunk
 
       # TODO: debounce here for performance
       dirty = =>
-        @component.__isDirty = true
-        @component.__onDirty?()
+        unless @component.__isDirty
+          @component.__isDirty = true
+          @component.__onDirty?()
 
       mountQueueCnt = 0
       unmountQueueCnt = 0
